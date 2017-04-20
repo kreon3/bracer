@@ -28,9 +28,9 @@ size_t iteration = 0;
 void loop()
 {
   digitalWrite(LED_BUILTIN, HIGH);
-  delay(1000);
+  delay(500);
   digitalWrite(LED_BUILTIN, LOW);
-  delay(300);
+  delay(500);
   Serial.print("I: ");
   Serial.println(iteration);
   ++iteration;
