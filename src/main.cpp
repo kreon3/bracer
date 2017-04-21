@@ -20,6 +20,11 @@
 #define BUTTON_A_PIN 4
 #define BUTTON_B_PIN 8
 
+// Button circuitry:
+// Arduino 5v <-> Button Terminal Right
+// Button Terminal Left <-> Arduino Pin 4/8
+// Button Terminal Left <-> 10k Resistor <-> Arduino Ground/General Ground
+
 int button_a_state = 0;
 int button_b_state = 0;
 void readButtons() {
