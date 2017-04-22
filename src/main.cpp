@@ -144,13 +144,14 @@ void setup()
 
   initButtons();
   initBnoSensor();
-  
+
   Serial.begin(115200);
   Serial.println("Setup complete.");
 }
 
 void printSensorState() {
   printButtonState();
+  Serial.print("\t");
   printBnoSensorState();
   Serial.println("");
 }
