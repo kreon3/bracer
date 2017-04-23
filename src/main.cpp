@@ -4,14 +4,19 @@
  */
 #include "Arduino.h"
 
-#include <Wire.h>
-#include <Adafruit_Sensor.h>
 #include <Adafruit_BNO055.h>
+#include <Adafruit_DotStar.h>
+#include <Adafruit_Sensor.h>
+#include <Wire.h>
+
+// Including this for platformio dependencies of unused
+// deep libraries.
+#include <SPI.h>
+#include <avr/power.h> // ENABLE THIS LINE FOR GEMMA OR TRINKET
 #include <utility/imumaths.h>
 
 // TODO:
 //   Modify board LED state based on the xor of the two buttons.
-//   Read the accelerometer data and write it to serial.
 //   Output initialize pattern for the LEDs.
 //   Use the accelerometer to color a sequence of the LEDs.
 
@@ -21,6 +26,9 @@
 
 #define BUTTON_A_PIN 4
 #define BUTTON_B_PIN 8
+
+#define LED_STRIP_DATA_PIN 9
+#define LED_STRIP_CLOCK_PIN 10
 
 // Button Circuitry:
 // Arduino 5v <-> Button Terminal Right
@@ -58,23 +66,32 @@ void printButtonState() {
 ////////////////////////////////////////////////////////////////////////////////
 // BNO055 Sensor
 Adafruit_BNO055 bno_sensor = Adafruit_BNO055(55);
+sensors_event_t bno_event;
 
 void displayBnoSensorDetails(void) {
   sensor_t sensor;
   bno_sensor.getSensor(&sensor);
   Serial.println("------------------------------------");
-  Serial.print  ("Sensor:       "); Serial.println(sensor.name);
-  Serial.print  ("Driver Ver:   "); Serial.println(sensor.version);
-  Serial.print  ("Unique ID:    "); Serial.println(sensor.sensor_id);
-  Serial.print  ("Max Value:    "); Serial.print(sensor.max_value); Serial.println(" xxx");
-  Serial.print  ("Min Value:    "); Serial.print(sensor.min_value); Serial.println(" xxx");
-  Serial.print  ("Resolution:   "); Serial.print(sensor.resolution); Serial.println(" xxx");
+  Serial.print("Sensor:       ");
+  Serial.println(sensor.name);
+  Serial.print("Driver Ver:   ");
+  Serial.println(sensor.version);
+  Serial.print("Unique ID:    ");
+  Serial.println(sensor.sensor_id);
+  Serial.print("Max Value:    ");
+  Serial.print(sensor.max_value);
+  Serial.println(" xxx");
+  Serial.print("Min Value:    ");
+  Serial.print(sensor.min_value);
+  Serial.println(" xxx");
+  Serial.print("Resolution:   ");
+  Serial.print(sensor.resolution);
+  Serial.println(" xxx");
   Serial.println("------------------------------------");
   Serial.println("");
 }
 
-void displayBnoSensorCalStatus(void)
-{
+void displayBnoSensorCalStatus(void) {
   /* Get the four calibration values (0..3) */
   /* Any sensor data reporting 0 should be ignored, */
   /* 3 means 'fully calibrated" */
@@ -100,17 +117,13 @@ void displayBnoSensorCalStatus(void)
 }
 
 void displayBnoSensorOrientation() {
-      /* Get a new sensor event */
-    sensors_event_t event;
-    bno_sensor.getEvent(&event);
-
-    /* Display the floating point data */
-    Serial.print("X: ");
-    Serial.print(event.orientation.x, 4);
-    Serial.print("\tY: ");
-    Serial.print(event.orientation.y, 4);
-    Serial.print("\tZ: ");
-    Serial.print(event.orientation.z, 4);
+  /* Display the floating point data */
+  Serial.print("X: ");
+  Serial.print(bno_event.orientation.x, 4);
+  Serial.print("\tY: ");
+  Serial.print(bno_event.orientation.y, 4);
+  Serial.print("\tZ: ");
+  Serial.print(bno_event.orientation.z, 4);
 }
 
 void initBnoSensor() {
@@ -124,24 +137,99 @@ void initBnoSensor() {
   displayBnoSensorDetails();
 }
 
-void updateBnoSensor(unsigned long millis) {
-
-}
+void updateBnoSensor(unsigned long millis) { bno_sensor.getEvent(&bno_event); }
 
 void printBnoSensorState() {
   displayBnoSensorOrientation();
   displayBnoSensorCalStatus();
 }
 
+////////////////////////////////////////////////////////////////////////////////
+// LED Strip Section
+
+// I think this is correct, might be 145 initially.
+// TODO: Change this for the final bracer, should be 4 strands of 14, so 56
+//  total.
+#define NUM_PIXELS 144
+
+Adafruit_DotStar led_strip = Adafruit_DotStar(NUM_PIXELS, LED_STRIP_DATA_PIN,
+                                              LED_STRIP_CLOCK_PIN, DOTSTAR_BRG);
+
+int head = 0, tail = -10;  // Index of first 'on' and 'off' pixels
+uint32_t color = 0xFF0000; // 'On' color (starts red)
+unsigned long last_led_update = 0;
+#define LED_FREQUENCY_MS 20;
+
+uint32_t colorFromSensor() {
+  uint8_t r = ((int32_t)bno_event.orientation.x % 255);
+  uint8_t g = ((int32_t)bno_event.orientation.y % 255);
+  uint8_t b = ((int32_t)bno_event.orientation.z % 255);
+
+  uint32_t color =
+      (((uint32_t)r) << 16) | (((uint32_t)g) << 8) | (((uint32_t)b));
+  return color;
+}
+
+// Perform the loop every 20ms.
+void ledStep() {
+  color = colorFromSensor();
+  led_strip.setPixelColor(head, color); // 'On' pixel at head
+  led_strip.setPixelColor(tail, 0);     // 'Off' pixel at tail
+
+  if (++head >= NUM_PIXELS) { // Increment head index.  Off end of strip?
+    head = 0;                 //  Yes, reset head index to start
+    // if ((color >>= 8) == 0)   //  Next color (R->G->B) ... past blue now?
+    //   color = 0xFF0000;       //   Yes, reset to red
+  }
+  if (++tail >= NUM_PIXELS)
+    tail = 0; // Increment, reset tail index
+}
+
+void updateLeds(unsigned long millis) {
+  size_t led_steps;
+
+  if (last_led_update != 0) {
+    led_steps = (millis - last_led_update) / LED_FREQUENCY_MS;
+  } else {
+    // Initial case, one step update.
+    led_steps = 1;
+  }
+
+  for (size_t i = 0; i < led_steps; ++i) {
+    ledStep();
+  }
+
+  // Update the last_led_update to the base of the step so if the next step
+  // comes within the next few milliseconds an update is properly performed.
+  last_led_update = millis - millis % LED_FREQUENCY_MS;
+  if (led_steps > 0) {
+    // Only update the strip if there are pattern changes.
+    led_strip.show();
+  }
+}
+
+void initLeds() {
+#if defined(__AVR_ATtiny85__) && (F_CPU == 16000000L)
+  clock_prescale_set(clock_div_1); // Enable 16 MHz on Trinket
+#endif
+
+  led_strip.begin(); // Initialize pins for output
+  led_strip.show();  // Turn all LEDs off ASAP
+}
+
+void printLedState() {
+  Serial.print("Color: ");
+  Serial.print(color, HEX);
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // Common Section
 
-void setup()
-{
+void setup() {
   // initialize LED digital pin as an output.
   pinMode(LED_BUILTIN, OUTPUT);
 
+  initLeds();
   initButtons();
   initBnoSensor();
 
@@ -152,6 +240,8 @@ void setup()
 void printSensorState() {
   printButtonState();
   Serial.print("\t");
+  printLedState();
+  Serial.print("\t");
   printBnoSensorState();
   Serial.println("");
 }
@@ -161,9 +251,8 @@ void update(unsigned long millis) {
   digitalWrite(LED_BUILTIN, millis % 1000 > 500 ? HIGH : LOW);
   updateButtons(millis);
   updateBnoSensor(millis);
+  updateLeds(millis);
   printSensorState();
 }
 
-void loop() {
-  update(millis());
-}
+void loop() { update(millis()); }
