@@ -1,6 +1,6 @@
 /**
  * Full wiring test for the bracer project.
- *
+ * Chip is stated to be the Atmega328P Chip
  */
 #include "Arduino.h"
 
@@ -12,7 +12,7 @@
 // Including this for platformio dependencies of unused
 // deep libraries.
 #include <SPI.h>
-#include <avr/power.h> // ENABLE THIS LINE FOR GEMMA OR TRINKET
+//#include <avr/power.h> // ENABLE THIS LINE FOR GEMMA OR TRINKET
 #include <utility/imumaths.h>
 
 // TODO:
@@ -40,6 +40,10 @@
 // Ground <-> BNO055 Ground
 // Arduino A4/SDA <-> BNO055 SDA
 // Arduino A5/SCL <-> BNO055 SCL
+
+// LED Circuitry:
+// Arduino D9 <-> LED Data
+// Arduino D10<-> LED Clock
 
 ////////////////////////////////////////////////////////////////////////////////
 // Buttons
