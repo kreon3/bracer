@@ -152,9 +152,9 @@ void printBnoSensorState() {
 // LED Strip Section
 
 // I think this is correct, might be 145 initially.
-// TODO: Change this for the final bracer, should be 4 strands of 14, so 56
+// TODO: Change this for the final bracer, should be 4 strands of 28, so 112
 //  total.
-#define NUM_PIXELS 144
+#define NUM_PIXELS (28 * 1)
 
 Adafruit_DotStar led_strip = Adafruit_DotStar(NUM_PIXELS, LED_STRIP_DATA_PIN,
                                               LED_STRIP_CLOCK_PIN, DOTSTAR_BRG);
