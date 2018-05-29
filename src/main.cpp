@@ -83,6 +83,7 @@ int button_b_state = 0;
 
 #define BUTTON_BRIGHTNESS_DELAY_MS 400
 #define BRIGHTENING_FACTOR 2
+#define INITIAL_BRIGHTNESS 64
 
 void initButtons() {
   pinMode(BUTTON_A_PIN, INPUT);
@@ -263,7 +264,7 @@ CRGB leds[NUM_PIXELS];
 //                                               DOTSTAR_BRG);
 
 int head = 10, tail = 0; // Index of first 'on' and 'off' pixels
-CRGB color = 0xFF0000;   // 'On' color (starts red)
+CRGB color = 0x000000;
 unsigned long last_led_update = 0;
 #define LED_FREQUENCY_MS 20;
 
@@ -319,8 +320,12 @@ void initLeds() {
 #endif
 
   LOGLN(DEBUG, "addLeds");
-  FastLED.addLeds<DOTSTAR, LED_STRIP_DATA_PIN, LED_STRIP_CLOCK_PIN>(leds,
-                                                                    NUM_PIXELS);
+  // Max power is expected to be 6400 mA. Capping at 4000 mW appears to stop
+  // lower power artifacts.
+  FastLED.setMaxPowerInMilliWatts(4000);
+  FastLED.setBrightness(INITIAL_BRIGHTNESS);
+  FastLED.addLeds<DOTSTAR, LED_STRIP_DATA_PIN, LED_STRIP_CLOCK_PIN, BGR>(
+      leds, NUM_PIXELS);
   // Turn all LEDs off ASAP
   LOGLN(DEBUG, "fill_solid");
   fill_solid(leds, NUM_PIXELS, CRGB(0, 0, 0));
