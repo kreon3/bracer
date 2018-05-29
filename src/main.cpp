@@ -46,25 +46,126 @@
 // Arduino D10<-> LED Clock
 
 ////////////////////////////////////////////////////////////////////////////////
+// Logging
+
+#define DEBUG 1
+#define VERBOSE 2
+#define INFO 3
+#define WARNING 4
+#define ERROR 5
+#define NONE 255
+
+#define LOG_LEVEL INFO
+
+#define LOG(LEVEL, MSG)                                                        \
+  if (LEVEL >= LOG_LEVEL)                                                      \
+    Serial.print(MSG);
+
+#define LOG_SPEC(LEVEL, MSG, SPEC)                                             \
+  if (LEVEL >= LOG_LEVEL)                                                      \
+    Serial.print(MSG, SPEC);
+
+#define LOGLN(LEVEL, MSG)                                                      \
+  if (LEVEL >= LOG_LEVEL)                                                      \
+    Serial.println(MSG);
+
+#define LOGLN_SPEC(LEVEL, MSG, SPEC)                                           \
+  if (LEVEL >= LOG_LEVEL)                                                      \
+    Serial.println(MSG, SPEC);
+
+////////////////////////////////////////////////////////////////////////////////
 // Buttons
 int button_a_state = 0;
 int button_b_state = 0;
+
+#define BUTTON_ON 1
+#define BUTTON_OFF 0
+
+#define BUTTON_BRIGHTNESS_DELAY_MS 400
+#define BRIGHTENING_FACTOR 1.5
 
 void initButtons() {
   pinMode(BUTTON_A_PIN, INPUT);
   pinMode(BUTTON_B_PIN, INPUT);
 }
 
+int last_button_b_state = 0;
+unsigned long last_button_b_update = 0;
+bool brightness_raised_while_button_on = false;
+
+void raiseBrightness() {
+  uint8_t brightness = FastLED.getBrightness();
+  uint16_t new_brightness16 = (uint16_t)brightness * BRIGHTENING_FACTOR;
+  uint8_t new_brightness = new_brightness16 < 255 ? new_brightness16 : 255;
+  // Always raise for fractional brighness.
+  if (new_brightness == brightness && new_brightness != 255) {
+    ++new_brightness;
+  }
+  LOG(INFO, "Raising brightness to: ");
+  LOGLN(INFO, new_brightness);
+  FastLED.setBrightness(new_brightness);
+}
+
+void lowerBrightness() {
+  uint8_t brightness = FastLED.getBrightness();
+  uint8_t new_brightness = brightness / BRIGHTENING_FACTOR;
+  if (new_brightness == 0) {
+    new_brightness = 1;
+  }
+  LOG(INFO, "Lowering brightness to: ");
+  LOGLN(INFO, new_brightness);
+  FastLED.setBrightness(new_brightness);
+}
+
+void updateLedBrightnessFromButton(int button_b_state, unsigned long millis) {
+  if (button_b_state == BUTTON_ON) {
+    if (last_button_b_state == BUTTON_ON) {
+      // On-to-on hold.
+      if (millis - last_button_b_update > BUTTON_BRIGHTNESS_DELAY_MS) {
+        LOGLN(INFO, "Button - on hold exceeded theshold");
+        lowerBrightness();
+        // Count the last update as the last threshold on time.
+        // last_button_b_update =
+        //     millis / BUTTON_BRIGHTNESS_DELAY_MS * BUTTON_BRIGHTNESS_DELAY_MS;
+        last_button_b_update = millis;
+        last_button_b_state = BUTTON_ON;
+        brightness_raised_while_button_on = true;
+      } // Else: not long enough to trigger an update.
+    } else {
+      LOGLN(INFO, "Button - Off-to-on");
+      LOG(INFO, millis);
+      // Off-to-on transition.
+      last_button_b_state = BUTTON_ON;
+      last_button_b_update = millis;
+    }
+  } else {
+    // button off.
+    if (last_button_b_state == BUTTON_ON) {
+      LOGLN(INFO, "Button On-to-off");
+      LOG(INFO, millis);
+      // On-to-off transition.
+      if (!brightness_raised_while_button_on) {
+        // Quick click on and off.
+        raiseBrightness();
+      }
+    }
+    last_button_b_state = BUTTON_OFF;
+    last_button_b_update = millis;
+    brightness_raised_while_button_on = false;
+  }
+}
+
 void updateButtons(unsigned long millis) {
   button_a_state = digitalRead(BUTTON_A_PIN);
   button_b_state = digitalRead(BUTTON_B_PIN);
+  updateLedBrightnessFromButton(button_b_state, millis);
 }
 
 void printButtonState() {
-  Serial.print("B[a]: ");
-  Serial.print(button_a_state);
-  Serial.print(" B[b]: ");
-  Serial.print(button_b_state);
+  LOG(DEBUG, "B[a]: ");
+  LOG(DEBUG, button_a_state);
+  LOG(DEBUG, " B[b]: ");
+  LOG(DEBUG, button_b_state);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -75,24 +176,24 @@ sensors_event_t bno_event;
 void displayBnoSensorDetails(void) {
   sensor_t sensor;
   bno_sensor.getSensor(&sensor);
-  Serial.println("------------------------------------");
-  Serial.print("Sensor:       ");
-  Serial.println(sensor.name);
-  Serial.print("Driver Ver:   ");
-  Serial.println(sensor.version);
-  Serial.print("Unique ID:    ");
-  Serial.println(sensor.sensor_id);
-  Serial.print("Max Value:    ");
-  Serial.print(sensor.max_value);
-  Serial.println(" xxx");
-  Serial.print("Min Value:    ");
-  Serial.print(sensor.min_value);
-  Serial.println(" xxx");
-  Serial.print("Resolution:   ");
-  Serial.print(sensor.resolution);
-  Serial.println(" xxx");
-  Serial.println("------------------------------------");
-  Serial.println("");
+  LOGLN(DEBUG, "------------------------------------");
+  LOG(DEBUG, "Sensor:       ");
+  LOGLN(DEBUG, sensor.name);
+  LOG(DEBUG, "Driver Ver:   ");
+  LOGLN(DEBUG, sensor.version);
+  LOG(DEBUG, "Unique ID:    ");
+  LOGLN(DEBUG, sensor.sensor_id);
+  LOG(DEBUG, "Max Value:    ");
+  LOG(DEBUG, sensor.max_value);
+  LOGLN(DEBUG, " xxx");
+  LOG(DEBUG, "Min Value:    ");
+  LOG(DEBUG, sensor.min_value);
+  LOGLN(DEBUG, " xxx");
+  LOG(DEBUG, "Resolution:   ");
+  LOG(DEBUG, sensor.resolution);
+  LOGLN(DEBUG, " xxx");
+  LOGLN(DEBUG, "------------------------------------");
+  LOGLN(DEBUG, "");
 }
 
 void displayBnoSensorCalStatus(void) {
@@ -104,36 +205,36 @@ void displayBnoSensorCalStatus(void) {
   bno_sensor.getCalibration(&system, &gyro, &accel, &mag);
 
   /* The data should be ignored until the system calibration is > 0 */
-  Serial.print("\t");
+  LOG(DEBUG, "\t");
   if (!system) {
-    Serial.print("! ");
+    LOG(DEBUG, "! ");
   }
 
   /* Display the individual values */
-  Serial.print("Sys:");
-  Serial.print(system, DEC);
-  Serial.print(" G:");
-  Serial.print(gyro, DEC);
-  Serial.print(" A:");
-  Serial.print(accel, DEC);
-  Serial.print(" M:");
-  Serial.print(mag, DEC);
+  LOG(DEBUG, "Sys:");
+  LOG_SPEC(DEBUG, system, DEC);
+  LOG(DEBUG, " G:");
+  LOG_SPEC(DEBUG, gyro, DEC);
+  LOG(DEBUG, " A:");
+  LOG_SPEC(DEBUG, accel, DEC);
+  LOG(DEBUG, " M:");
+  LOG_SPEC(DEBUG, mag, DEC);
 }
 
 void displayBnoSensorOrientation() {
   /* Display the floating point data */
-  Serial.print("X: ");
-  Serial.print(bno_event.orientation.x, 4);
-  Serial.print("\tY: ");
-  Serial.print(bno_event.orientation.y, 4);
-  Serial.print("\tZ: ");
-  Serial.print(bno_event.orientation.z, 4);
+  LOG(DEBUG, "X: ");
+  LOG_SPEC(DEBUG, bno_event.orientation.x, 4);
+  LOG(DEBUG, "\tY: ");
+  LOG_SPEC(DEBUG, bno_event.orientation.y, 4);
+  LOG(DEBUG, "\tZ: ");
+  LOG_SPEC(DEBUG, bno_event.orientation.z, 4);
 }
 
 void initBnoSensor() {
   while (!bno_sensor.begin()) {
     /* There was a problem detecting the BNO055 ... check your connections */
-    Serial.print("No BNO055 detected ... Check your wiring or I2C ADDR!");
+    LOG(ERROR, "No BNO055 detected ... Check your wiring or I2C ADDR!");
   }
   // The external crystal is stated to give better accuracy.
   bno_sensor.setExtCrystalUse(true);
@@ -156,7 +257,8 @@ void printBnoSensorState() {
 
 CRGB leds[NUM_PIXELS];
 
-// Adafruit_DotStar led_strip = Adafruit_DotStar(NUM_PIXELS, LED_STRIP_DATA_PIN,
+// Adafruit_DotStar led_strip = Adafruit_DotStar(NUM_PIXELS,
+// LED_STRIP_DATA_PIN,
 //                                               LED_STRIP_CLOCK_PIN,
 //                                               DOTSTAR_BRG);
 
@@ -173,7 +275,7 @@ void colorFromSensor(CRGB *color) {
 
 // Perform the loop every 20ms.
 void ledStep() {
-  Serial.println("ledStep start");
+  LOGLN(DEBUG, "ledStep start");
   colorFromSensor(&color);
   leds[head] = color;    // 'On' pixel at head
   leds[tail] = 0x000000; // 'Off' pixel at tail
@@ -184,7 +286,7 @@ void ledStep() {
   if (++tail >= NUM_PIXELS) {
     tail = 0; // Increment, reset tail index
   }
-  Serial.println("ledStep done");
+  LOGLN(DEBUG, "ledStep done");
 }
 
 void updateLeds(unsigned long millis) {
@@ -206,7 +308,7 @@ void updateLeds(unsigned long millis) {
   last_led_update = millis - millis % LED_FREQUENCY_MS;
   if (led_steps > 0) {
     // Only update the strip if there are pattern changes.
-    Serial.println("FastLED.show()");
+    LOGLN(DEBUG, "FastLED.show()");
     FastLED.show();
   }
 }
@@ -216,22 +318,22 @@ void initLeds() {
   clock_prescale_set(clock_div_1); // Enable 16 MHz on Trinket
 #endif
 
-  Serial.println("addLeds");
+  LOGLN(DEBUG, "addLeds");
   FastLED.addLeds<DOTSTAR, LED_STRIP_DATA_PIN, LED_STRIP_CLOCK_PIN>(leds,
                                                                     NUM_PIXELS);
   // Turn all LEDs off ASAP
-  Serial.println("fill_solid");
+  LOGLN(DEBUG, "fill_solid");
   fill_solid(leds, NUM_PIXELS, CRGB(0, 0, 0));
-  Serial.println("first show");
+  LOGLN(DEBUG, "first show");
   FastLED.show();
-  Serial.println("first show done");
+  LOGLN(DEBUG, "first show done");
 }
 
 void printLedState() {
-  Serial.print("Color: ");
-  Serial.print(color.r, HEX);
-  Serial.print(color.g, HEX);
-  Serial.print(color.b, HEX);
+  LOG(DEBUG, "Color: ");
+  LOG_SPEC(DEBUG, color.r, HEX);
+  LOG_SPEC(DEBUG, color.g, HEX);
+  LOG_SPEC(DEBUG, color.b, HEX);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -239,7 +341,7 @@ void printLedState() {
 
 void setup() {
   Serial.begin(115200);
-  Serial.println("Setup started.");
+  LOGLN(INFO, "Setup started.");
   // initialize LED digital pin as an output.
   pinMode(LED_BUILTIN, OUTPUT);
 
@@ -247,16 +349,16 @@ void setup() {
   initButtons();
   initBnoSensor();
 
-  Serial.println("Setup complete.");
+  LOGLN(INFO, "Setup complete.");
 }
 
 void printSensorState() {
   printButtonState();
-  Serial.print("\t");
+  LOG(DEBUG, "\t");
   printLedState();
-  Serial.print("\t");
+  LOG(DEBUG, "\t");
   printBnoSensorState();
-  Serial.println("");
+  LOGLN(DEBUG, "");
 }
 
 // Perform everything using a timer so constant polling is available.
@@ -265,6 +367,7 @@ void update(unsigned long millis) {
   updateButtons(millis);
   updateBnoSensor(millis);
   updateLeds(millis);
+
   printSensorState();
 }
 
