@@ -5,9 +5,8 @@
 #include "Arduino.h"
 
 #include <Adafruit_BNO055.h>
-// #include <Adafruit_DotStar.h>
+#include <Adafruit_DotStar.h>
 #include <Adafruit_Sensor.h>
-#include <FastLED.h>
 #include <Wire.h>
 
 // Including this for platformio dependencies of unused
@@ -152,40 +151,42 @@ void printBnoSensorState() {
 ////////////////////////////////////////////////////////////////////////////////
 // LED Strip Section
 
-// 4 strips of 28 pixels.
+// I think this is correct, might be 145 initially.
+// TODO: Change this for the final bracer, should be 4 strands of 28, so 112
+//  total.
 #define NUM_PIXELS (28 * 4)
 
-CRGB leds[NUM_PIXELS];
+Adafruit_DotStar led_strip = Adafruit_DotStar(NUM_PIXELS, LED_STRIP_DATA_PIN,
+                                              LED_STRIP_CLOCK_PIN, DOTSTAR_BRG);
 
-// Adafruit_DotStar led_strip = Adafruit_DotStar(NUM_PIXELS, LED_STRIP_DATA_PIN,
-//                                               LED_STRIP_CLOCK_PIN,
-//                                               DOTSTAR_BRG);
-
-int head = 10, tail = 0; // Index of first 'on' and 'off' pixels
-CRGB color = 0xFF0000;   // 'On' color (starts red)
+int head = 10, tail = 0;   // Index of first 'on' and 'off' pixels
+uint32_t color = 0xFF0000; // 'On' color (starts red)
 unsigned long last_led_update = 0;
 #define LED_FREQUENCY_MS 20;
 
-void colorFromSensor(CRGB *color) {
-  color->r = ((int32_t)bno_event.orientation.x % 255);
-  color->g = ((int32_t)bno_event.orientation.y % 255);
-  color->b = ((int32_t)bno_event.orientation.z % 255);
+uint32_t colorFromSensor() {
+  uint8_t r = ((int32_t)bno_event.orientation.x % 255);
+  uint8_t g = ((int32_t)bno_event.orientation.y % 255);
+  uint8_t b = ((int32_t)bno_event.orientation.z % 255);
+
+  uint32_t color =
+      (((uint32_t)r) << 16) | (((uint32_t)g) << 8) | (((uint32_t)b));
+  return color;
 }
 
 // Perform the loop every 20ms.
 void ledStep() {
-  Serial.println("ledStep start");
-  colorFromSensor(&color);
-  leds[head] = color;    // 'On' pixel at head
-  leds[tail] = 0x000000; // 'Off' pixel at tail
+  color = colorFromSensor();
+  led_strip.setPixelColor(head, color); // 'On' pixel at head
+  led_strip.setPixelColor(tail, 0);     // 'Off' pixel at tail
 
   if (++head >= NUM_PIXELS) { // Increment head index.  Off end of strip?
     head = 0;                 //  Yes, reset head index to start
+    // if ((color >>= 8) == 0)   //  Next color (R->G->B) ... past blue now?
+    //   color = 0xFF0000;       //   Yes, reset to red
   }
-  if (++tail >= NUM_PIXELS) {
+  if (++tail >= NUM_PIXELS)
     tail = 0; // Increment, reset tail index
-  }
-  Serial.println("ledStep done");
 }
 
 void updateLeds(unsigned long millis) {
@@ -207,8 +208,7 @@ void updateLeds(unsigned long millis) {
   last_led_update = millis - millis % LED_FREQUENCY_MS;
   if (led_steps > 0) {
     // Only update the strip if there are pattern changes.
-    Serial.println("FastLED.show()");
-    FastLED.show();
+    led_strip.show();
   }
 }
 
@@ -217,22 +217,13 @@ void initLeds() {
   clock_prescale_set(clock_div_1); // Enable 16 MHz on Trinket
 #endif
 
-  Serial.println("addLeds");
-  FastLED.addLeds<DOTSTAR, LED_STRIP_DATA_PIN, LED_STRIP_CLOCK_PIN>(leds,
-                                                                    NUM_PIXELS);
-  // Turn all LEDs off ASAP
-  Serial.println("fill_solid");
-  fill_solid(leds, NUM_PIXELS, CRGB(100, 0, 0));
-  Serial.println("first show");
-  FastLED.show();
-  Serial.println("first show done");
+  led_strip.begin(); // Initialize pins for output
+  led_strip.show();  // Turn all LEDs off ASAP
 }
 
 void printLedState() {
   Serial.print("Color: ");
-  Serial.print(color.r, HEX);
-  Serial.print(color.g, HEX);
-  Serial.print(color.b, HEX);
+  Serial.print(color, HEX);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -240,15 +231,13 @@ void printLedState() {
 
 void setup() {
   // initialize LED digital pin as an output.
-  Serial.begin(115200);
-  Serial.println("Setup started.");
-
   pinMode(LED_BUILTIN, OUTPUT);
 
   initLeds();
   initButtons();
   initBnoSensor();
 
+  Serial.begin(115200);
   Serial.println("Setup complete.");
 }
 
