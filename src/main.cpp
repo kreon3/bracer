@@ -82,7 +82,7 @@ int button_b_state = 0;
 #define BUTTON_OFF 0
 
 #define BUTTON_BRIGHTNESS_DELAY_MS 400
-#define BRIGHTENING_FACTOR 1.5
+#define BRIGHTENING_FACTOR 2
 
 void initButtons() {
   pinMode(BUTTON_A_PIN, INPUT);
