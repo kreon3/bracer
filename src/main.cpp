@@ -7,6 +7,7 @@
 #include <Adafruit_BNO055.h>
 #include <Adafruit_Sensor.h>
 #include <FastLED.h>
+#include <Logging.h>
 #include <Patterns.h>
 #include <Wire.h>
 
@@ -46,33 +47,8 @@
 // Arduino D9 <-> LED Data
 // Arduino D10<-> LED Clock
 
-////////////////////////////////////////////////////////////////////////////////
-// Logging
-
-#define DEBUG 1
-#define VERBOSE 2
-#define INFO 3
-#define WARNING 4
-#define ERROR 5
-#define NONE 255
-
-#define LOG_LEVEL INFO
-
-#define LOG(LEVEL, MSG)                                                        \
-  if (LEVEL >= LOG_LEVEL)                                                      \
-    Serial.print(MSG);
-
-#define LOG_SPEC(LEVEL, MSG, SPEC)                                             \
-  if (LEVEL >= LOG_LEVEL)                                                      \
-    Serial.print(MSG, SPEC);
-
-#define LOGLN(LEVEL, MSG)                                                      \
-  if (LEVEL >= LOG_LEVEL)                                                      \
-    Serial.println(MSG);
-
-#define LOGLN_SPEC(LEVEL, MSG, SPEC)                                           \
-  if (LEVEL >= LOG_LEVEL)                                                      \
-    Serial.println(MSG, SPEC);
+// Patterns modified by buttons and LED sections.
+Patterns *patterns_ = nullptr;
 
 ////////////////////////////////////////////////////////////////////////////////
 // Buttons
@@ -157,9 +133,20 @@ void updateLedBrightnessFromButton(int button_b_state, unsigned long millis) {
   }
 }
 
+int last_button_a_state_ = BUTTON_OFF;
+void changePatternFromButton(int button_a_state, unsigned long millis) {
+  if (button_a_state == BUTTON_ON && last_button_a_state_ == BUTTON_OFF) {
+    if (patterns_ != nullptr) {
+      patterns_->next_pattern();
+    }
+  }
+  last_button_a_state_ = button_a_state;
+}
+
 void updateButtons(unsigned long millis) {
   button_a_state = digitalRead(BUTTON_A_PIN);
   button_b_state = digitalRead(BUTTON_B_PIN);
+  changePatternFromButton(button_a_state, millis);
   updateLedBrightnessFromButton(button_b_state, millis);
 }
 
@@ -255,7 +242,9 @@ void printBnoSensorState() {
 // LED Strip Section
 
 // 4 strips of 28 pixels.
-#define NUM_PIXELS (28 * 4)
+#define LED_WIDTH 28
+#define LED_HEIGHT 4
+#define NUM_PIXELS (LED_WIDTH * LED_HEIGHT)
 
 CRGB leds[NUM_PIXELS];
 
@@ -276,44 +265,47 @@ void colorFromSensor(CRGB *color) {
 }
 
 // Perform the loop every 20ms.
-void ledStep() {
-  LOGLN(DEBUG, "ledStep start");
-  colorFromSensor(&color);
-  leds[head] = color;    // 'On' pixel at head
-  leds[tail] = 0x000000; // 'Off' pixel at tail
+// void ledStep() {
+//   LOGLN(DEBUG, "ledStep start");
+//   colorFromSensor(&color);
+//   leds[head] = color;    // 'On' pixel at head
+//   leds[tail] = 0x000000; // 'Off' pixel at tail
+//
+//   if (++head >= NUM_PIXELS) { // Increment head index.  Off end of strip?
+//     head = 0;                 //  Yes, reset head index to start
+//   }
+//   if (++tail >= NUM_PIXELS) {
+//     tail = 0; // Increment, reset tail index
+//   }
+//   LOGLN(DEBUG, "ledStep done");
+// }
 
-  if (++head >= NUM_PIXELS) { // Increment head index.  Off end of strip?
-    head = 0;                 //  Yes, reset head index to start
-  }
-  if (++tail >= NUM_PIXELS) {
-    tail = 0; // Increment, reset tail index
-  }
-  LOGLN(DEBUG, "ledStep done");
-}
+// void updateLeds(unsigned long millis) {
+//
+//   size_t led_steps;
+//
+//   if (last_led_update != 0) {
+//     led_steps = (millis - last_led_update) / LED_FREQUENCY_MS;
+//   } else {
+//     // Initial case, one step update.
+//     led_steps = 1;
+//   }
+//
+//   for (size_t i = 0; i < led_steps; ++i) {
+//     ledStep();
+//   }
+//
+//   // Update the last_led_update to the base of the step so if the next step
+//   // comes within the next few milliseconds an update is properly performed.
+//   last_led_update = millis - millis % LED_FREQUENCY_MS;
+//   if (led_steps > 0) {
+//     // Only update the strip if there are pattern changes.
+//     LOGLN(DEBUG, "FastLED.show()");
+//     FastLED.show();
+//   }
+// }
 
-void updateLeds(unsigned long millis) {
-  size_t led_steps;
-
-  if (last_led_update != 0) {
-    led_steps = (millis - last_led_update) / LED_FREQUENCY_MS;
-  } else {
-    // Initial case, one step update.
-    led_steps = 1;
-  }
-
-  for (size_t i = 0; i < led_steps; ++i) {
-    ledStep();
-  }
-
-  // Update the last_led_update to the base of the step so if the next step
-  // comes within the next few milliseconds an update is properly performed.
-  last_led_update = millis - millis % LED_FREQUENCY_MS;
-  if (led_steps > 0) {
-    // Only update the strip if there are pattern changes.
-    LOGLN(DEBUG, "FastLED.show()");
-    FastLED.show();
-  }
-}
+void updateLeds(unsigned long millis) { patterns_->update(millis, bno_event); }
 
 void initLeds() {
 #if defined(__AVR_ATtiny85__) && (F_CPU == 16000000L)
@@ -333,6 +325,8 @@ void initLeds() {
   LOGLN(DEBUG, "first show");
   FastLED.show();
   LOGLN(DEBUG, "first show done");
+
+  patterns_ = new Patterns(leds, LED_WIDTH, LED_HEIGHT);
 }
 
 void printLedState() {
