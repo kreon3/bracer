@@ -28,3 +28,5 @@ void LedDisplay::set_color(uint8_t column, uint8_t row, CRGB color) {
     Serial.println(i);
   }
 }
+
+void LedDisplay::show() { FastLED.show(); }

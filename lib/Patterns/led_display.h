@@ -12,6 +12,8 @@ public:
   void set_color(uint8_t column, uint8_t row, CHSV color);
   void set_color(uint8_t column, uint8_t row, CRGB color);
 
+  void show();
+
   uint8_t max_index();
 
 private:
