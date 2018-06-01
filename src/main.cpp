@@ -136,6 +136,7 @@ void updateLedBrightnessFromButton(int button_b_state, unsigned long millis) {
 int last_button_a_state_ = BUTTON_OFF;
 void changePatternFromButton(int button_a_state, unsigned long millis) {
   if (button_a_state == BUTTON_ON && last_button_a_state_ == BUTTON_OFF) {
+    Serial.println("Button A pressed");
     if (patterns_ != nullptr) {
       patterns_->next_pattern();
     }
@@ -253,16 +254,16 @@ CRGB leds[NUM_PIXELS];
 //                                               LED_STRIP_CLOCK_PIN,
 //                                               DOTSTAR_BRG);
 
-int head = 10, tail = 0; // Index of first 'on' and 'off' pixels
+// int head = 10, tail = 0; // Index of first 'on' and 'off' pixels
 CRGB color = 0x000000;
-unsigned long last_led_update = 0;
-#define LED_FREQUENCY_MS 20;
-
-void colorFromSensor(CRGB *color) {
-  color->r = ((int32_t)bno_event.orientation.x % 255);
-  color->g = ((int32_t)bno_event.orientation.y % 255);
-  color->b = ((int32_t)bno_event.orientation.z % 255);
-}
+// unsigned long last_led_update = 0;
+// #define LED_FREQUENCY_MS 20;
+//
+// void colorFromSensor(CRGB *color) {
+//   color->r = ((int32_t)bno_event.orientation.x % 255);
+//   color->g = ((int32_t)bno_event.orientation.y % 255);
+//   color->b = ((int32_t)bno_event.orientation.z % 255);
+// }
 
 // Perform the loop every 20ms.
 // void ledStep() {
@@ -305,7 +306,9 @@ void colorFromSensor(CRGB *color) {
 //   }
 // }
 
-void updateLeds(unsigned long millis) { patterns_->update(millis, bno_event); }
+void updateLeds(unsigned long millis) {
+  patterns_->update(millis, bno_event);
+}
 
 void initLeds() {
 #if defined(__AVR_ATtiny85__) && (F_CPU == 16000000L)

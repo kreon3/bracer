@@ -2,7 +2,10 @@
 #include "gyro_rainbow_pattern.h"
 #include <FastLED.h>
 
-void GyroRainbowPattern::start() { set_all(0x001100); }
+void GyroRainbowPattern::start() {
+  Pattern::start();
+  set_all(0x001100);
+}
 
 void GyroRainbowPattern::led_step(const sensors_event_t &sensor_event) {
 

@@ -29,10 +29,20 @@ void Patterns::update(unsigned long millis,
 }
 
 void Patterns::next_pattern() {
-  PatternType t = get_pattern();
-  if (t >= MAX_PATTERN) {
-    set_pattern(static_cast<PatternType>(0));
-  } else {
-    set_pattern(static_cast<PatternType>(static_cast<uint8_t>(t) + 1));
+
+  PatternType curr_pattern = get_pattern();
+  size_t pattern_int = curr_pattern;
+  ++pattern_int;
+  if (pattern_int >= MAX_PATTERN) {
+    pattern_int = 0;
   }
+  PatternType next_pattern = static_cast<PatternType>(pattern_int);
+  LOG(INFO, "Switching to next_pattern ");
+  LOG(INFO, next_pattern);
+  LOG(INFO, " from pattern ");
+  LOG(INFO, curr_pattern);
+
+  LOG(INFO, " max patterns ");
+  LOGLN(INFO, MAX_PATTERN);
+  set_pattern(next_pattern);
 }

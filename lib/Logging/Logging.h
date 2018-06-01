@@ -10,7 +10,7 @@
 #define ERROR 5
 #define NONE 255
 
-#define LOG_LEVEL DEBUG
+#define LOG_LEVEL INFO
 
 #define LOG(LEVEL, MSG)                                                        \
   if (LEVEL >= LOG_LEVEL)                                                      \
