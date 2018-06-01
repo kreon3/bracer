@@ -7,7 +7,13 @@
 class Patterns {
 public:
   Patterns(CRGB *leds, uint8_t width, uint8_t height);
-  enum PatternType { UNLIT, GYRO_RAINBOW, SPARKLE, BARS, MAX_PATTERN };
+  enum PatternType {
+    UNLIT,
+    GYRO_RAINBOW,
+    RANDOM_RAINBOW,
+    SPARKLE,
+    BARS,
+    MAX_PATTERN };
 
   void set_pattern(PatternType pattern);
   PatternType get_pattern();

@@ -1,6 +1,7 @@
 
 #include "Patterns.h"
 #include "gyro_rainbow_pattern.h"
+#include "random_rainbow_pattern.h"
 #include "unlit_pattern.h"
 #include <Logging.h>
 
@@ -9,6 +10,7 @@ Patterns::Patterns(CRGB *leds, uint8_t width, uint8_t height)
   // Pattern *unlit = new UnlitPattern(&display_);
   patterns_[UNLIT] = new UnlitPattern(&display_);
   patterns_[GYRO_RAINBOW] = new GyroRainbowPattern(&display_, 20);
+  patterns_[RANDOM_RAINBOW] = new RandomRainbowPattern(&display_, 20);
   patterns_[SPARKLE] = new UnlitPattern(&display_);
   patterns_[BARS] = new GyroRainbowPattern(&display_, 20);
   set_pattern(current_pattern_type_);

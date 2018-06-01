@@ -6,7 +6,9 @@
 
 class Pattern {
 public:
-  Pattern(LedDisplay *display, unsigned long step_frequency_ms);
+  Pattern(
+    LedDisplay *display,
+    unsigned long step_frequency_ms);
   // Starts the pattern.
   virtual void start() = 0;
   // Update the pattern.
