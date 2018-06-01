@@ -7,6 +7,7 @@
 #include <Adafruit_BNO055.h>
 #include <Adafruit_Sensor.h>
 #include <FastLED.h>
+#include <Patterns.h>
 #include <Wire.h>
 
 // Including this for platformio dependencies of unused
