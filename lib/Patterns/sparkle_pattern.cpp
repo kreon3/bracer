@@ -36,7 +36,8 @@ void SparklePattern::initSparkle(SparklePattern::Sparkle *sparkle) {
   pick_unused_pixel(&row, &col);
   active_pixel_map_[row][col] = true;
   sparkle->reset(
-    random(255), random(200, 255), random(255), 0, random(30), true, row, col);
+    random(255), random(200, 255), random(255), 0,
+    random(5, 30), true, row, col);
   LOG(INFO, "New sparkle at ");
   LOG(INFO, row);
   LOG(INFO, ", ");
