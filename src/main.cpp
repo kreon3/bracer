@@ -289,18 +289,15 @@ void printLedState() {
 
 void setup() {
   Serial.begin(115200);
-  // Serial.println("non log setup started");
   LOGLN(INFO, "Setup started.");
   // initialize LED digital pin as an output.
   pinMode(LED_BUILTIN, OUTPUT);
 
-  // Serial.println("init leds");
   initLeds();
   initButtons();
   initBnoSensor();
 
   LOGLN(INFO, "Setup complete.");
-  // Serial.println("non log setup done");
 }
 
 void printSensorState() {
