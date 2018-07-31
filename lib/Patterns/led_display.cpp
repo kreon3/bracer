@@ -48,3 +48,7 @@ uint8_t LedDisplay::lookup_index(uint8_t column, uint8_t row) const {
     return (row + 1) * width_ - column - 1;
   }
 }
+
+CRGB* LedDisplay::leds() {
+  return leds_;
+}

@@ -15,6 +15,8 @@ public:
 
   void show();
 
+  CRGB* leds();
+
   uint8_t max_index() const;
   uint8_t width() const;
   uint8_t height() const;

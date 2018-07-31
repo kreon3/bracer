@@ -249,62 +249,7 @@ void printBnoSensorState() {
 
 CRGB leds[NUM_PIXELS];
 
-// Adafruit_DotStar led_strip = Adafruit_DotStar(NUM_PIXELS,
-// LED_STRIP_DATA_PIN,
-//                                               LED_STRIP_CLOCK_PIN,
-//                                               DOTSTAR_BRG);
-
-// int head = 10, tail = 0; // Index of first 'on' and 'off' pixels
 CRGB color = 0x000000;
-// unsigned long last_led_update = 0;
-// #define LED_FREQUENCY_MS 20;
-//
-// void colorFromSensor(CRGB *color) {
-//   color->r = ((int32_t)bno_event.orientation.x % 255);
-//   color->g = ((int32_t)bno_event.orientation.y % 255);
-//   color->b = ((int32_t)bno_event.orientation.z % 255);
-// }
-
-// Perform the loop every 20ms.
-// void ledStep() {
-//   LOGLN(DEBUG, "ledStep start");
-//   colorFromSensor(&color);
-//   leds[head] = color;    // 'On' pixel at head
-//   leds[tail] = 0x000000; // 'Off' pixel at tail
-//
-//   if (++head >= NUM_PIXELS) { // Increment head index.  Off end of strip?
-//     head = 0;                 //  Yes, reset head index to start
-//   }
-//   if (++tail >= NUM_PIXELS) {
-//     tail = 0; // Increment, reset tail index
-//   }
-//   LOGLN(DEBUG, "ledStep done");
-// }
-
-// void updateLeds(unsigned long millis) {
-//
-//   size_t led_steps;
-//
-//   if (last_led_update != 0) {
-//     led_steps = (millis - last_led_update) / LED_FREQUENCY_MS;
-//   } else {
-//     // Initial case, one step update.
-//     led_steps = 1;
-//   }
-//
-//   for (size_t i = 0; i < led_steps; ++i) {
-//     ledStep();
-//   }
-//
-//   // Update the last_led_update to the base of the step so if the next step
-//   // comes within the next few milliseconds an update is properly performed.
-//   last_led_update = millis - millis % LED_FREQUENCY_MS;
-//   if (led_steps > 0) {
-//     // Only update the strip if there are pattern changes.
-//     LOGLN(DEBUG, "FastLED.show()");
-//     FastLED.show();
-//   }
-// }
 
 void updateLeds(unsigned long millis) {
   patterns_->update(millis, bno_event);
@@ -344,15 +289,18 @@ void printLedState() {
 
 void setup() {
   Serial.begin(115200);
+  // Serial.println("non log setup started");
   LOGLN(INFO, "Setup started.");
   // initialize LED digital pin as an output.
   pinMode(LED_BUILTIN, OUTPUT);
 
+  // Serial.println("init leds");
   initLeds();
   initButtons();
   initBnoSensor();
 
   LOGLN(INFO, "Setup complete.");
+  // Serial.println("non log setup done");
 }
 
 void printSensorState() {
