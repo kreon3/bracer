@@ -286,29 +286,7 @@ void printLedState() {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// Common Section
-
-void setup() {
-  Serial.begin(115200);
-  LOGLN(INFO, "Setup started.");
-  // initialize LED digital pin as an output.
-  pinMode(LED_BUILTIN, OUTPUT);
-
-  initLeds();
-  initButtons();
-  initBnoSensor();
-
-  LOGLN(INFO, "Setup complete.");
-}
-
-void printSensorState() {
-  printButtonState();
-  LOG(DEBUG, "\t");
-  printLedState();
-  LOG(DEBUG, "\t");
-  printBnoSensorState();
-  LOGLN(DEBUG, "");
-}
+// Memory Tracking
 
 #ifdef __arm__
 // should use uinstd.h to define sbrk but Due causes a conflict
@@ -339,6 +317,34 @@ void warnLowMemory() {
     LOGLN(WARNING, free_mem);
   }
 }
+
+////////////////////////////////////////////////////////////////////////////////
+// Common Section
+
+void setup() {
+  Serial.begin(115200);
+  LOGLN(INFO, "Setup started.");
+  // initialize LED digital pin as an output.
+  pinMode(LED_BUILTIN, OUTPUT);
+
+  initLeds();
+  initButtons();
+  initBnoSensor();
+
+  LOGLN(INFO, "Setup complete.");
+  LOG(INFO, "Memory: ");
+  LOGLN(INFO, freeMemory());
+}
+
+void printSensorState() {
+  printButtonState();
+  LOG(DEBUG, "\t");
+  printLedState();
+  LOG(DEBUG, "\t");
+  printBnoSensorState();
+  LOGLN(DEBUG, "");
+}
+
 
 // Perform everything using a timer so constant polling is available.
 void update(unsigned long millis) {

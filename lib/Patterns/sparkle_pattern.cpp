@@ -38,10 +38,10 @@ void SparklePattern::initSparkle(SparklePattern::Sparkle *sparkle) {
   sparkle->reset(
     random(255), random(200, 255), random(255), 0,
     random(5, 30), true, row, col);
-  LOG(INFO, "New sparkle at ");
-  LOG(INFO, row);
-  LOG(INFO, ", ");
-  LOGLN(INFO, col);
+  LOG(VERBOSE, "New sparkle at ");
+  LOG(VERBOSE, row);
+  LOG(VERBOSE, ", ");
+  LOGLN(VERBOSE, col);
 }
 
 void SparklePattern::stepSparkle(SparklePattern::Sparkle *sparkle) {
