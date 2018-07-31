@@ -10,6 +10,7 @@
 #include <Logging.h>
 #include <Patterns.h>
 #include <Wire.h>
+#include <avr/pgmspace.h>
 
 // Including this for platformio dependencies of unused
 // deep libraries.
@@ -79,7 +80,7 @@ void raiseBrightness() {
   if (new_brightness == brightness && new_brightness != 255) {
     ++new_brightness;
   }
-  LOG(INFO, "Raising brightness to: ");
+  LOG(INFO, F("Raising brightness to: "));
   LOGLN(INFO, new_brightness);
   FastLED.setBrightness(new_brightness);
 }
@@ -90,7 +91,7 @@ void lowerBrightness() {
   if (new_brightness == 0) {
     new_brightness = 1;
   }
-  LOG(INFO, "Lowering brightness to: ");
+  LOG(INFO, F("Lowering brightness to: "));
   LOGLN(INFO, new_brightness);
   FastLED.setBrightness(new_brightness);
 }
@@ -100,7 +101,7 @@ void updateLedBrightnessFromButton(int button_b_state, unsigned long millis) {
     if (last_button_b_state == BUTTON_ON) {
       // On-to-on hold.
       if (millis - last_button_b_update > BUTTON_BRIGHTNESS_DELAY_MS) {
-        LOGLN(INFO, "Button - on hold exceeded theshold");
+        LOGLN(INFO, F("Button - on hold exceeded theshold"));
         lowerBrightness();
         // Count the last update as the last threshold on time.
         // last_button_b_update =
@@ -110,7 +111,7 @@ void updateLedBrightnessFromButton(int button_b_state, unsigned long millis) {
         brightness_raised_while_button_on = true;
       } // Else: not long enough to trigger an update.
     } else {
-      LOGLN(INFO, "Button - Off-to-on");
+      LOGLN(INFO, F("Button - Off-to-on"));
       LOG(INFO, millis);
       // Off-to-on transition.
       last_button_b_state = BUTTON_ON;
@@ -119,7 +120,7 @@ void updateLedBrightnessFromButton(int button_b_state, unsigned long millis) {
   } else {
     // button off.
     if (last_button_b_state == BUTTON_ON) {
-      LOGLN(INFO, "Button On-to-off");
+      LOGLN(INFO, F("Button On-to-off"));
       LOG(INFO, millis);
       // On-to-off transition.
       if (!brightness_raised_while_button_on) {
@@ -136,7 +137,7 @@ void updateLedBrightnessFromButton(int button_b_state, unsigned long millis) {
 int last_button_a_state_ = BUTTON_OFF;
 void changePatternFromButton(int button_a_state, unsigned long millis) {
   if (button_a_state == BUTTON_ON && last_button_a_state_ == BUTTON_OFF) {
-    Serial.println("Button A pressed");
+    LOGLN(INFO, F("Button A pressed"));
     if (patterns_ != nullptr) {
       patterns_->next_pattern();
     }
@@ -152,9 +153,9 @@ void updateButtons(unsigned long millis) {
 }
 
 void printButtonState() {
-  LOG(DEBUG, "B[a]: ");
+  LOG(DEBUG, F("B[a]: "));
   LOG(DEBUG, button_a_state);
-  LOG(DEBUG, " B[b]: ");
+  LOG(DEBUG, F(" B[b]: "));
   LOG(DEBUG, button_b_state);
 }
 
@@ -166,8 +167,8 @@ sensors_event_t bno_event;
 void displayBnoSensorDetails(void) {
   sensor_t sensor;
   bno_sensor.getSensor(&sensor);
-  LOGLN(DEBUG, "------------------------------------");
-  LOG(DEBUG, "Sensor:       ");
+  LOGLN(DEBUG, F("------------------------------------"));
+  LOG(DEBUG, F("Sensor:       "));
   LOGLN(DEBUG, sensor.name);
   LOG(DEBUG, "Driver Ver:   ");
   LOGLN(DEBUG, sensor.version);
@@ -309,6 +310,36 @@ void printSensorState() {
   LOGLN(DEBUG, "");
 }
 
+#ifdef __arm__
+// should use uinstd.h to define sbrk but Due causes a conflict
+extern "C" char* sbrk(int incr);
+#else  // __ARM__
+extern char *__brkval;
+#endif  // __arm__
+
+size_t freeMemory() {
+  char top;
+#ifdef __arm__
+  return &top - reinterpret_cast<char*>(sbrk(0));
+#elif defined(CORE_TEENSY) || (ARDUINO > 103 && ARDUINO != 151)
+  return &top - __brkval;
+#else  // __arm__
+  return __brkval ? &top - __brkval : &top - __malloc_heap_start;
+#endif  // __arm__
+}
+
+void warnLowMemory() {
+  size_t free_mem = freeMemory();
+
+  if (free_mem < 50) {
+    LOG(ERROR, F("Very low mem: "));
+    LOGLN(ERROR, free_mem);
+  } else if (free_mem < 200) {
+    LOG(WARNING, F("Low mem: "));
+    LOGLN(WARNING, free_mem);
+  }
+}
+
 // Perform everything using a timer so constant polling is available.
 void update(unsigned long millis) {
   digitalWrite(LED_BUILTIN, millis % 1000 > 500 ? HIGH : LOW);
@@ -316,7 +347,10 @@ void update(unsigned long millis) {
   updateBnoSensor(millis);
   updateLeds(millis);
 
+  // Always warn on low memory as this leads to memory corruption of the stack!
+  warnLowMemory();
   printSensorState();
 }
+
 
 void loop() { update(millis()); }

@@ -15,8 +15,8 @@ Patterns::Patterns(CRGB *leds, uint8_t width, uint8_t height)
   patterns_[GYRO_RAINBOW] = new GyroRainbowPattern(&display_, 20);
   patterns_[RANDOM_RAINBOW] = new RandomRainbowPattern(&display_, 20);
   patterns_[SPARKLE] = new SparklePattern(&display_, 20);
-  patterns_[BARS] = new UnlitPattern(&display_);
-  // patterns_[BARS] =  new BarsPattern(&display_, 20);
+  // patterns_[BARS] = new UnlitPattern(&display_);
+  patterns_[BARS] =  new BarsPattern(&display_, 20);
   // patterns_[CONFETTI] = new UnlitPattern(&display_);
   patterns_[CONFETTI] = new ConfettiDimPattern(&display_, 20);
   set_pattern(current_pattern_type_);

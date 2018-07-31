@@ -8,13 +8,12 @@ BarsPattern::BarsPattern(
   LedDisplay *display,
   unsigned long step_frequency_ms)
     : Pattern(display, step_frequency_ms) {
-
 }
 
 void BarsPattern::start() {
+  // bars_[1] = new Bar();
   Pattern::start();
   set_all(0x000000);
-
   for (uint8_t i = 0; i < NUM_BARS; ++i) {
     initBar(&bars_[i], i);
   }
@@ -26,7 +25,7 @@ void BarsPattern::led_step(const sensors_event_t &sensor_event) {
   }
 }
 
-void BarsPattern::initBar(BarsPattern::Bar *bar, uint8_t row) {
+void BarsPattern::initBar(Bar *bar, uint8_t row) {
   uint8_t col = random(PIXEL_WIDTH / 2) + PIXEL_WIDTH / 4;
   bar->reset(
     random(255),
@@ -44,7 +43,7 @@ void BarsPattern::initBar(BarsPattern::Bar *bar, uint8_t row) {
   LOGLN(INFO, col);
 }
 
-void BarsPattern::stepBar(BarsPattern::Bar *bar) {
+void BarsPattern::stepBar(Bar *bar) {
   int16_t max = bar->max_value_;
   int16_t curr = bar->current_value_;
   int16_t next = curr;
@@ -85,8 +84,19 @@ void BarsPattern::drawBar(Bar* bar) {
   }
 }
 
+Bar::Bar() :
+  hue_(0),
+  saturation_(0),
+  max_value_(0),
+  current_value_(0),
+  change_per_step_(0),
+  increasing_(false),
+  row_(0),
+  col_(0),
+  taper_(0) {
+}
 
-void BarsPattern::Bar::reset(
+void Bar::reset(
   uint8_t hue,
   uint8_t saturation,
   uint8_t max_value,
@@ -96,7 +106,6 @@ void BarsPattern::Bar::reset(
   uint8_t row,
   uint8_t col,
   uint8_t taper) {
-
   hue_ = hue;
   saturation_ = saturation;
   max_value_ = max_value;
@@ -106,4 +115,4 @@ void BarsPattern::Bar::reset(
   row_ = row;
   col_ = col;
   taper_ = taper;
-  }
+}
