@@ -18,7 +18,8 @@ void Pattern::start() {
 }
 
 void Pattern::update(unsigned long millis,
-                     const sensors_event_t &sensor_event) {
+                     const sensors_event_t &sensor_event,
+                     Adafruit_BNO055 &bno_sensor) {
   size_t led_steps;
 
   if (last_led_update_ != 0) {
@@ -29,7 +30,7 @@ void Pattern::update(unsigned long millis,
   }
 
   for (size_t i = 0; i < led_steps; ++i) {
-    led_step(sensor_event);
+    led_step(sensor_event, bno_sensor);
   }
 
   // Update the last_led_update to the base of the step so if the next step
@@ -44,4 +45,9 @@ void Pattern::update(unsigned long millis,
     LOGLN(DEBUG, "FastLED.show()");
     display_->show();
   }
+}
+
+void Pattern::led_step(const sensors_event_t &sensor_event,
+                      Adafruit_BNO055 &bno_sensor) {
+  led_step(sensor_event);
 }

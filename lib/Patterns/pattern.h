@@ -13,10 +13,15 @@ public:
   virtual void start() = 0;
   // Update the pattern.
   virtual void update(unsigned long millis,
-                      const sensors_event_t &sensor_event);
+                      const sensors_event_t &sensor_event,
+                      Adafruit_BNO055 &bno_sensor);
 
   // Perform one step of the led pattern.
+  // TODO: Ideally the led_step functions would be merged into something that
+  // has the linear_acceleration for all of them without reading the sensor.
   virtual void led_step(const sensors_event_t &sensor_event) = 0;
+  virtual void led_step(const sensors_event_t &sensor_event,
+                        Adafruit_BNO055 &bno_sensor);
 
   virtual void set_all(CRGB color);
 

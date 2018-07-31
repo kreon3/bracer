@@ -253,7 +253,7 @@ CRGB leds[NUM_PIXELS];
 CRGB color = 0x000000;
 
 void updateLeds(unsigned long millis) {
-  patterns_->update(millis, bno_event);
+  patterns_->update(millis, bno_event, bno_sensor);
 }
 
 void initLeds() {

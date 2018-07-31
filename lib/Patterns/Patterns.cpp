@@ -32,8 +32,9 @@ void Patterns::set_pattern(PatternType pattern) {
 }
 
 void Patterns::update(unsigned long millis,
-                      const sensors_event_t &sensor_event) {
-  patterns_[get_pattern()]->update(millis, sensor_event);
+                      const sensors_event_t &sensor_event,
+                      Adafruit_BNO055 &bno_sensor) {
+  patterns_[get_pattern()]->update(millis, sensor_event, bno_sensor);
 }
 
 void Patterns::next_pattern() {

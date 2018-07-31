@@ -20,7 +20,9 @@ public:
   PatternType get_pattern();
   void next_pattern();
 
-  void update(unsigned long millis, const sensors_event_t &sensor_event);
+  void update(unsigned long millis,
+              const sensors_event_t &sensor_event,
+              Adafruit_BNO055 &bno_sensor);
 
 private:
   LedDisplay display_;
