@@ -22,7 +22,7 @@ Patterns::Patterns(CRGB *leds, uint8_t width, uint8_t height)
 Patterns::PatternType Patterns::get_pattern() { return current_pattern_type_; }
 
 void Patterns::set_pattern(PatternType pattern) {
-  LOG(INFO, "Setting pattern to ");
+  LOGF(INFO, "Setting pattern to ");
   LOGLN(INFO, pattern);
   current_pattern_type_ = pattern;
   patterns_[pattern]->start();
@@ -43,12 +43,12 @@ void Patterns::next_pattern() {
     pattern_int = 0;
   }
   PatternType next_pattern = static_cast<PatternType>(pattern_int);
-  LOG(INFO, "Switching to next_pattern ");
+  LOGF(INFO, "Switching to next_pattern ");
   LOG(INFO, next_pattern);
-  LOG(INFO, " from pattern ");
+  LOGF(INFO, " from pattern ");
   LOG(INFO, curr_pattern);
 
-  LOG(INFO, " max patterns ");
+  LOGF(INFO, " max patterns ");
   LOGLN(INFO, MAX_PATTERN);
   set_pattern(next_pattern);
 }

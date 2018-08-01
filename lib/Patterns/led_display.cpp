@@ -10,7 +10,7 @@ CRGB *LedDisplay::get_pixel(uint8_t column, uint8_t row) {
   if (i <= max_index()) {
     return &(leds_[i]);
   } else {
-    LOG(ERROR, "Out of bounds index ");
+    LOGF(ERROR, "Out of bounds index ");
     LOGLN(ERROR, i);
     return nullptr;
   }
@@ -28,7 +28,7 @@ void LedDisplay::set_color(uint8_t column, uint8_t row, CRGB color) {
   if (i <= max_index()) {
     leds_[i] = color;
   } else {
-    LOG(ERROR, "Out of bounds index ");
+    LOGF(ERROR, "Out of bounds index ");
     LOGLN(ERROR, i);
   }
 }

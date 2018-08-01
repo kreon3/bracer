@@ -9,7 +9,7 @@ void ConfettiDimPattern::start() {
 }
 
 void ConfettiDimPattern::led_step(const sensors_event_t &sensor_event) {
-  LOG(ERROR, F("led_step called on ConfettiDimPattern without bno_sensor"));
+  LOGF(ERROR, "led_step called on ConfettiDimPattern without bno_sensor");
 }
 
 void ConfettiDimPattern::led_step(const sensors_event_t &sensor_event, Adafruit_BNO055 &bno_sensor) {

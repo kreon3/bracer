@@ -37,9 +37,9 @@ void BarsPattern::initBar(Bar *bar, uint8_t row) {
     row,
     col,
     random(15, 30));
-  LOG(INFO, "New bar at ");
+  LOGF(INFO, "New bar at ");
   LOG(INFO, row);
-  LOG(INFO, ", ");
+  LOGF(INFO, ", ");
   LOGLN(INFO, col);
 }
 

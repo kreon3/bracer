@@ -80,7 +80,7 @@ void raiseBrightness() {
   if (new_brightness == brightness && new_brightness != 255) {
     ++new_brightness;
   }
-  LOG(INFO, F("Raising brightness to: "));
+  LOGF(INFO, "Raising brightness to: ");
   LOGLN(INFO, new_brightness);
   FastLED.setBrightness(new_brightness);
 }
@@ -91,7 +91,7 @@ void lowerBrightness() {
   if (new_brightness == 0) {
     new_brightness = 1;
   }
-  LOG(INFO, F("Lowering brightness to: "));
+  LOGF(INFO, "Lowering brightness to: ");
   LOGLN(INFO, new_brightness);
   FastLED.setBrightness(new_brightness);
 }
@@ -101,7 +101,7 @@ void updateLedBrightnessFromButton(int button_b_state, unsigned long millis) {
     if (last_button_b_state == BUTTON_ON) {
       // On-to-on hold.
       if (millis - last_button_b_update > BUTTON_BRIGHTNESS_DELAY_MS) {
-        LOGLN(INFO, F("Button - on hold exceeded theshold"));
+        LOGLNF(INFO, "Button - on hold exceeded theshold");
         lowerBrightness();
         // Count the last update as the last threshold on time.
         // last_button_b_update =
@@ -111,7 +111,7 @@ void updateLedBrightnessFromButton(int button_b_state, unsigned long millis) {
         brightness_raised_while_button_on = true;
       } // Else: not long enough to trigger an update.
     } else {
-      LOGLN(INFO, F("Button - Off-to-on"));
+      LOGLNF(INFO, "Button - Off-to-on");
       LOG(INFO, millis);
       // Off-to-on transition.
       last_button_b_state = BUTTON_ON;
@@ -120,7 +120,7 @@ void updateLedBrightnessFromButton(int button_b_state, unsigned long millis) {
   } else {
     // button off.
     if (last_button_b_state == BUTTON_ON) {
-      LOGLN(INFO, F("Button On-to-off"));
+      LOGLNF(INFO, "Button On-to-off");
       LOG(INFO, millis);
       // On-to-off transition.
       if (!brightness_raised_while_button_on) {
@@ -137,7 +137,7 @@ void updateLedBrightnessFromButton(int button_b_state, unsigned long millis) {
 int last_button_a_state_ = BUTTON_OFF;
 void changePatternFromButton(int button_a_state, unsigned long millis) {
   if (button_a_state == BUTTON_ON && last_button_a_state_ == BUTTON_OFF) {
-    LOGLN(INFO, F("Button A pressed"));
+    LOGLNF(INFO, "Button A pressed");
     if (patterns_ != nullptr) {
       patterns_->next_pattern();
     }
@@ -153,9 +153,9 @@ void updateButtons(unsigned long millis) {
 }
 
 void printButtonState() {
-  LOG(DEBUG, F("B[a]: "));
+  LOGF(DEBUG, "B[a]: ");
   LOG(DEBUG, button_a_state);
-  LOG(DEBUG, F(" B[b]: "));
+  LOGF(DEBUG, " B[b]: ");
   LOG(DEBUG, button_b_state);
 }
 
@@ -167,24 +167,24 @@ sensors_event_t bno_event;
 void displayBnoSensorDetails(void) {
   sensor_t sensor;
   bno_sensor.getSensor(&sensor);
-  LOGLN(DEBUG, F("------------------------------------"));
-  LOG(DEBUG, F("Sensor:       "));
+  LOGLNF(DEBUG, "------------------------------------");
+  LOGF(DEBUG, "Sensor:       ");
   LOGLN(DEBUG, sensor.name);
-  LOG(DEBUG, "Driver Ver:   ");
+  LOGF(DEBUG, "Driver Ver:   ");
   LOGLN(DEBUG, sensor.version);
-  LOG(DEBUG, "Unique ID:    ");
+  LOGF(DEBUG, "Unique ID:    ");
   LOGLN(DEBUG, sensor.sensor_id);
-  LOG(DEBUG, "Max Value:    ");
+  LOGF(DEBUG, "Max Value:    ");
   LOG(DEBUG, sensor.max_value);
-  LOGLN(DEBUG, " xxx");
-  LOG(DEBUG, "Min Value:    ");
+  LOGLNF(DEBUG, " xxx");
+  LOGF(DEBUG, "Min Value:    ");
   LOG(DEBUG, sensor.min_value);
-  LOGLN(DEBUG, " xxx");
-  LOG(DEBUG, "Resolution:   ");
+  LOGLNF(DEBUG, " xxx");
+  LOGF(DEBUG, "Resolution:   ");
   LOG(DEBUG, sensor.resolution);
-  LOGLN(DEBUG, " xxx");
-  LOGLN(DEBUG, "------------------------------------");
-  LOGLN(DEBUG, "");
+  LOGLNF(DEBUG, " xxx");
+  LOGLNF(DEBUG, "------------------------------------");
+  LOGLNF(DEBUG, "");
 }
 
 void displayBnoSensorCalStatus(void) {
@@ -196,36 +196,36 @@ void displayBnoSensorCalStatus(void) {
   bno_sensor.getCalibration(&system, &gyro, &accel, &mag);
 
   /* The data should be ignored until the system calibration is > 0 */
-  LOG(DEBUG, "\t");
+  LOGF(DEBUG, "\t");
   if (!system) {
-    LOG(DEBUG, "! ");
+    LOGF(DEBUG, "! ");
   }
 
   /* Display the individual values */
-  LOG(DEBUG, "Sys:");
+  LOGF(DEBUG, "Sys:");
   LOG_SPEC(DEBUG, system, DEC);
-  LOG(DEBUG, " G:");
+  LOGF(DEBUG, " G:");
   LOG_SPEC(DEBUG, gyro, DEC);
-  LOG(DEBUG, " A:");
+  LOGF(DEBUG, " A:");
   LOG_SPEC(DEBUG, accel, DEC);
-  LOG(DEBUG, " M:");
+  LOGF(DEBUG, " M:");
   LOG_SPEC(DEBUG, mag, DEC);
 }
 
 void displayBnoSensorOrientation() {
   /* Display the floating point data */
-  LOG(DEBUG, "X: ");
+  LOGF(DEBUG, "X: ");
   LOG_SPEC(DEBUG, bno_event.orientation.x, 4);
-  LOG(DEBUG, "\tY: ");
+  LOGF(DEBUG, "\tY: ");
   LOG_SPEC(DEBUG, bno_event.orientation.y, 4);
-  LOG(DEBUG, "\tZ: ");
+  LOGF(DEBUG, "\tZ: ");
   LOG_SPEC(DEBUG, bno_event.orientation.z, 4);
 }
 
 void initBnoSensor() {
   while (!bno_sensor.begin()) {
     /* There was a problem detecting the BNO055 ... check your connections */
-    LOG(ERROR, "No BNO055 detected ... Check your wiring or I2C ADDR!");
+    LOGF(ERROR, "No BNO055 detected ... Check your wiring or I2C ADDR!");
   }
   // The external crystal is stated to give better accuracy.
   bno_sensor.setExtCrystalUse(true);
@@ -261,7 +261,7 @@ void initLeds() {
   clock_prescale_set(clock_div_1); // Enable 16 MHz on Trinket
 #endif
 
-  LOGLN(DEBUG, "addLeds");
+  LOGLNF(DEBUG, "addLeds");
   // Max power is expected to be 6400 mA. Capping at 4000 mW appears to stop
   // lower power artifacts.
   FastLED.setMaxPowerInMilliWatts(4000);
@@ -269,17 +269,17 @@ void initLeds() {
   FastLED.addLeds<DOTSTAR, LED_STRIP_DATA_PIN, LED_STRIP_CLOCK_PIN, BGR>(
       leds, NUM_PIXELS);
   // Turn all LEDs off ASAP
-  LOGLN(DEBUG, "fill_solid");
+  LOGLNF(DEBUG, "fill_solid");
   fill_solid(leds, NUM_PIXELS, CRGB(0, 0, 0));
-  LOGLN(DEBUG, "first show");
+  LOGLNF(DEBUG, "first show");
   FastLED.show();
-  LOGLN(DEBUG, "first show done");
+  LOGLNF(DEBUG, "first show done");
 
   patterns_ = new Patterns(leds, LED_WIDTH, LED_HEIGHT);
 }
 
 void printLedState() {
-  LOG(DEBUG, "Color: ");
+  LOGF(DEBUG, "Color: ");
   LOG_SPEC(DEBUG, color.r, HEX);
   LOG_SPEC(DEBUG, color.g, HEX);
   LOG_SPEC(DEBUG, color.b, HEX);
@@ -310,10 +310,10 @@ void warnLowMemory() {
   size_t free_mem = freeMemory();
 
   if (free_mem < 50) {
-    LOG(ERROR, F("Very low mem: "));
+    LOGF(ERROR, "Very low mem: ");
     LOGLN(ERROR, free_mem);
   } else if (free_mem < 200) {
-    LOG(WARNING, F("Low mem: "));
+    LOGF(WARNING, "Low mem: ");
     LOGLN(WARNING, free_mem);
   }
 }
@@ -323,7 +323,7 @@ void warnLowMemory() {
 
 void setup() {
   Serial.begin(115200);
-  LOGLN(INFO, "Setup started.");
+  LOGLNF(INFO, "Setup started.");
   // initialize LED digital pin as an output.
   pinMode(LED_BUILTIN, OUTPUT);
 
@@ -331,18 +331,18 @@ void setup() {
   initButtons();
   initBnoSensor();
 
-  LOGLN(INFO, "Setup complete.");
-  LOG(INFO, "Memory: ");
+  LOGLNF(INFO, "Setup complete.");
+  LOGF(INFO, "Memory: ");
   LOGLN(INFO, freeMemory());
 }
 
 void printSensorState() {
   printButtonState();
-  LOG(DEBUG, "\t");
+  LOGF(DEBUG, "\t");
   printLedState();
-  LOG(DEBUG, "\t");
+  LOGF(DEBUG, "\t");
   printBnoSensorState();
-  LOGLN(DEBUG, "");
+  LOGLNF(DEBUG, "");
 }
 
 

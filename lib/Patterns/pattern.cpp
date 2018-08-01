@@ -38,11 +38,11 @@ void Pattern::update(unsigned long millis,
   last_led_update_ = millis - millis % step_frequency_ms_;
   if (led_steps > 0) {
     if (led_steps > 1) {
-      LOG(WARNING, "Slow led update, steps: ");
+      LOGF(WARNING, "Slow led update, steps: ");
       LOGLN(WARNING, led_steps);
     }
     // Only update the strip if there are pattern changes.
-    LOGLN(DEBUG, "FastLED.show()");
+    LOGLNF(DEBUG, "FastLED.show()");
     display_->show();
   }
 }

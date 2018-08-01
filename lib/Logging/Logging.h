@@ -1,3 +1,5 @@
+#include <avr/pgmspace.h>
+
 #ifndef LIB_LOGGING_H_
 #define LIB_LOGGING_H_
 ////////////////////////////////////////////////////////////////////////////////
@@ -60,6 +62,13 @@
 #define LOGLN_SPEC(LEVEL, MSG, SPEC) \
   LOG_##LEVEL##_FUNC(Serial.println, MSG, SPEC)
 
+// Helpers to also define the message text in the program space.
+// These are very useful to use as the initial refactoring switched the
+// remaining memory from 243 bytes left to 475.
+#define LOGF(LEVEL, MSG) \
+  LOG_##LEVEL##_FUNC(Serial.print, F("" MSG))
 
+#define LOGLNF(LEVEL, MSG) \
+  LOG_##LEVEL##_FUNC(Serial.println, F("" MSG))
 
 #endif // LIB_LOGGING_H_

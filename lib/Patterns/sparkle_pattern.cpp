@@ -38,9 +38,9 @@ void SparklePattern::initSparkle(SparklePattern::Sparkle *sparkle) {
   sparkle->reset(
     random(255), random(200, 255), random(255), 0,
     random(5, 30), true, row, col);
-  LOG(VERBOSE, "New sparkle at ");
+  LOGF(VERBOSE, "New sparkle at ");
   LOG(VERBOSE, row);
-  LOG(VERBOSE, ", ");
+  LOGF(VERBOSE, ", ");
   LOGLN(VERBOSE, col);
 }
 
