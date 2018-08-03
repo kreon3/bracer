@@ -1,5 +1,6 @@
-
 #include "gyro_rainbow_pattern.h"
+
+#include <Adafruit_BNO055.h>
 #include <FastLED.h>
 
 void GyroRainbowPattern::start() {
@@ -7,7 +8,8 @@ void GyroRainbowPattern::start() {
   set_all(0x001100);
 }
 
-void GyroRainbowPattern::led_step(const sensors_event_t &sensor_event) {
+void GyroRainbowPattern::led_step(const sensors_event_t &sensor_event,
+                                  Adafruit_BNO055 &bno_sensor) {
 
   // TODO: This could be made significantly faster with memmove if needed.
   for (int r = 0; r < display_->height(); ++r) {

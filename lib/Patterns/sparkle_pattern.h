@@ -12,7 +12,8 @@ public:
   SparklePattern(LedDisplay *display, unsigned long step_frequency_ms);
   void start() override;
 
-  void led_step(const sensors_event_t &sensor_event) override;
+  void led_step(const sensors_event_t &sensor_event,
+                Adafruit_BNO055 &bno_sensor) override;
 
 private:
   struct Sparkle {

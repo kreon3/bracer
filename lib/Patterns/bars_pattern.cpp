@@ -1,5 +1,6 @@
-
 #include "bars_pattern.h"
+
+#include <Adafruit_BNO055.h>
 #include <FastLED.h>
 #include <Logging.h>
 
@@ -19,7 +20,8 @@ void BarsPattern::start() {
   }
 }
 
-void BarsPattern::led_step(const sensors_event_t &sensor_event) {
+void BarsPattern::led_step(const sensors_event_t &sensor_event,
+                           Adafruit_BNO055 &bno_sensor) {
   for (uint8_t i = 0; i < NUM_BARS; ++i) {
     stepBar(&bars_[i]);
   }

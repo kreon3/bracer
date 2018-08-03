@@ -1,5 +1,6 @@
 
 #include "random_rainbow_pattern.h"
+#include <Adafruit_BNO055.h>
 #include <FastLED.h>
 
 void RandomRainbowPattern::start() {
@@ -11,7 +12,8 @@ static uint8_t random_delta_hue(uint8_t hue) {
   return hue + 20 - random(40);
 }
 
-void RandomRainbowPattern::led_step(const sensors_event_t &sensor_event) {
+void RandomRainbowPattern::led_step(const sensors_event_t &sensor_event,
+                                    Adafruit_BNO055 &bno_sensor) {
 
   // TODO: This could be made significantly faster with memmove if needed.
   for (int r = 0; r < display_->height(); ++r) {

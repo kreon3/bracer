@@ -1,5 +1,6 @@
-#include "pattern.h"
+#include <Adafruit_BNO055.h>
 #include <Logging.h>
+#include "pattern.h"
 
 Pattern::Pattern(LedDisplay *display, unsigned long step_frequency_ms)
     : display_(display), step_frequency_ms_(step_frequency_ms),
@@ -45,9 +46,4 @@ void Pattern::update(unsigned long millis,
     LOGLNF(DEBUG, "FastLED.show()");
     display_->show();
   }
-}
-
-void Pattern::led_step(const sensors_event_t &sensor_event,
-                      Adafruit_BNO055 &bno_sensor) {
-  led_step(sensor_event);
 }

@@ -1,5 +1,6 @@
 
 #include "sparkle_pattern.h"
+#include <Adafruit_BNO055.h>
 #include <FastLED.h>
 #include <Logging.h>
 
@@ -25,7 +26,8 @@ void SparklePattern::start() {
   }
 }
 
-void SparklePattern::led_step(const sensors_event_t &sensor_event) {
+void SparklePattern::led_step(const sensors_event_t &sensor_event,
+                              Adafruit_BNO055 &bno_sensor) {
   for (uint8_t i = 0; i < NUM_SPARKLES; ++i) {
     stepSparkle(&sparkles_[i]);
   }

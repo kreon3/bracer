@@ -17,11 +17,8 @@ public:
                       Adafruit_BNO055 &bno_sensor);
 
   // Perform one step of the led pattern.
-  // TODO: Ideally the led_step functions would be merged into something that
-  // has the linear_acceleration for all of them without reading the sensor.
-  virtual void led_step(const sensors_event_t &sensor_event) = 0;
   virtual void led_step(const sensors_event_t &sensor_event,
-                        Adafruit_BNO055 &bno_sensor);
+                        Adafruit_BNO055 &bno_sensor) = 0;
 
   virtual void set_all(CRGB color);
 

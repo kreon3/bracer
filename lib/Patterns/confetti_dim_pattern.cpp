@@ -1,6 +1,7 @@
 #include "confetti_dim_pattern.h"
+
+#include <Adafruit_BNO055.h>
 #include <FastLED.h>
-#include <Arduino.h>
 #include <Logging.h>
 
 void ConfettiDimPattern::start() {
@@ -8,11 +9,8 @@ void ConfettiDimPattern::start() {
   set_all(0x000000);
 }
 
-void ConfettiDimPattern::led_step(const sensors_event_t &sensor_event) {
-  LOGF(ERROR, "led_step called on ConfettiDimPattern without bno_sensor");
-}
-
-void ConfettiDimPattern::led_step(const sensors_event_t &sensor_event, Adafruit_BNO055 &bno_sensor) {
+void ConfettiDimPattern::led_step(const sensors_event_t &sensor_event,
+                                  Adafruit_BNO055 &bno_sensor) {
   fadeToBlackBy(display_->leds(), display_->max_index(), 10);
 
   // Get new hues. Overflow is intended.
