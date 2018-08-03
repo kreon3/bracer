@@ -21,7 +21,7 @@ void Pattern::start() {
 void Pattern::update(unsigned long millis,
                      const sensors_event_t &sensor_event,
                      Adafruit_BNO055 &bno_sensor) {
-  size_t led_steps;
+  uint32_t led_steps;
 
   if (last_led_update_ != 0) {
     led_steps = (millis - last_led_update_) / step_frequency_ms_;
