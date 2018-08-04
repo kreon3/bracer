@@ -20,6 +20,10 @@ public:
   uint8_t max_index() const;
   uint8_t width() const;
   uint8_t height() const;
+  /* Same as width. */
+  uint8_t cols() const;
+  /* Same as height(). */
+  uint8_t rows() const;
 
 private:
   uint8_t lookup_index(uint8_t column, uint8_t row) const;

@@ -38,6 +38,8 @@ void LedDisplay::show() { FastLED.show(); }
 uint8_t LedDisplay::max_index() const { return width_ * height_ - 1; }
 uint8_t LedDisplay::width() const { return width_; }
 uint8_t LedDisplay::height() const { return height_; }
+uint8_t LedDisplay::cols() const { return width_; }
+uint8_t LedDisplay::rows() const { return height_; }
 
 uint8_t LedDisplay::lookup_index(uint8_t column, uint8_t row) const {
   if ((row & 1) == 0) {

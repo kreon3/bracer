@@ -17,8 +17,7 @@ void ConfettiDimPattern::led_step(const sensors_event_t &sensor_event,
   uint8_t hue = sensor_event.orientation.x
       + sensor_event.orientation.y
       + sensor_event.orientation.z;
-  // TODO: This should be a utility function.
-
+  // TODO: Switch this to using the vector's magnitude.
   imu::Vector<3> lin_accel_v
       = bno_sensor.getVector(Adafruit_BNO055::VECTOR_LINEARACCEL);
   float lin_accel = lin_accel_v.x() + lin_accel_v.y() + lin_accel_v.z();
