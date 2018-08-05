@@ -4,17 +4,23 @@
 #include <FastLED.h>
 #include <Logging.h>
 
-
+static double max_linear_accel = 0;
 uint8_t get_linear_intensity(Adafruit_BNO055 &sensor) {
   imu::Vector<3> lin_accel_v
       = sensor.getVector(Adafruit_BNO055::VECTOR_LINEARACCEL);
 
   // Expected values for intensity should be 0-200. Expecting max linear
   // acceleration to be 4m/s.
-  uint32_t intensity = lin_accel_v.magnitude() * (200 / 4);
+  uint32_t intensity = lin_accel_v.magnitude() * 15 / 2;
+  max_linear_accel = max(lin_accel_v.magnitude(), max_linear_accel);
+
   uint8_t result = min(intensity, 255);
-  LOGF(DEBUG, "Intensity: ");
-  LOGLN(DEBUG, result);
+  LOGF(INFO, "Intensity(");
+  LOG(INFO, lin_accel_v.magnitude());
+  LOGF(INFO, ", ");
+  LOG(INFO, max_linear_accel);
+  LOGF(INFO, "): ");
+  LOGLN(INFO, result);
   return result;
 }
 

@@ -28,8 +28,6 @@ void FirePattern::start() {
 void FirePattern::led_step(const sensors_event_t &sensor_event,
                            Adafruit_BNO055 &bno_sensor) {
   uint8_t intensity = get_linear_intensity(bno_sensor);
-  log_gravity(bno_sensor);
-
   Position pos = get_position(bno_sensor);
   heat_update(intensity, pos);
   draw_heat();
@@ -71,7 +69,7 @@ void FirePattern::heat_update(uint8_t intensity, Position position) {
     }
 
     // New sparks.
-    uint32_t spark_value = random(205 + intensity);
+    uint32_t spark_value = random(210 + intensity);
     if (spark_value > 200) {
       uint8_t spark_col;
       if (position == Position::UP) {
