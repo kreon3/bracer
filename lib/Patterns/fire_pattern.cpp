@@ -81,6 +81,16 @@ void FirePattern::heat_update(uint8_t intensity, Position position) {
       }
       set_heat(row, spark_col, random8(140, 255));
     }
+
+    // Add a small constant heat to the bottom.
+    size_t bottom_increase = random(0, 40);
+    if (position == Position::UP) {
+      set_heat(row, 0, get_heat(row, 0) + bottom_increase);
+      set_heat(row, 1, get_heat(row, 1) + bottom_increase * 0.8);
+    } else if (position == Position::DOWN) {
+      set_heat(row, display_->cols()-1, get_heat(row, display_->cols()-1) + bottom_increase);
+      set_heat(row, display_->cols()-2, get_heat(row, display_->cols()-2) + bottom_increase * 0.8);
+    }
   }
 }
 
