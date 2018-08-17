@@ -15,7 +15,7 @@ public:
     BARS,
     CONFETTI,
     FIRE,
-    BLUE_FIRE,
+    // BLUE_FIRE,
     MAX_PATTERN};
 
   void set_pattern(PatternType pattern);

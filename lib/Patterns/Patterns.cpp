@@ -18,7 +18,7 @@ Patterns::Patterns(CRGB *leds, uint8_t width, uint8_t height)
   patterns_[BARS] =  new BarsPattern(&display_, 20);
   patterns_[CONFETTI] = new ConfettiDimPattern(&display_, 20);
   patterns_[FIRE] = new FirePattern(&display_, 30);
-  patterns_[BLUE_FIRE] = patterns_[FIRE];
+  // patterns_[BLUE_FIRE] = patterns_[FIRE];
   set_pattern(current_pattern_type_);
 }
 
