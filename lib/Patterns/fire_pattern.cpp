@@ -53,14 +53,14 @@ void FirePattern::heat_update(uint8_t intensity, Position position) {
         set_heat(row, i, (get_heat(row, i-1) + 2 * get_heat(row, i-2) / 3));
       }
     } else if (position == Position::DOWN) {
-      for (size_t i = 0; i < cols - 2; ++i) {
+      for (uint8_t i = 0; i < cols - 2; ++i) {
         // TODO: Update this diffusion so it is more relative to adjacent cells.
         set_heat(row, i, (get_heat(row, i+1) + 2 * get_heat(row, i+2) / 3));
       }
     } else {
       byte last_heat = get_heat(row, 0);
       set_heat(row, 0, get_heat(row, 0) + get_heat(row, 1) / 3);
-      for (size_t i = 1; i < cols - 1; ++i) {
+      for (uint8_t i = 1; i < cols - 1; ++i) {
         byte cur_heat = get_heat(row, i) + (last_heat + get_heat(row, i+1)) / 3;
         last_heat = get_heat(row, i);
         set_heat(row, i, cur_heat);
