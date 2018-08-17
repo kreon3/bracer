@@ -11,7 +11,9 @@ void GyroRainbowPattern::start() {
 
 void GyroRainbowPattern::led_step(const sensors_event_t &sensor_event,
                                   Adafruit_BNO055 &bno_sensor) {
-  uint8_t intensity = get_linear_intensity(bno_sensor);
+
+  uint16_t intensity = get_linear_intensity(bno_sensor);
+  intensity = min(255, max(intensity * 2, 40));
   // TODO: This could be made significantly faster with memmove if needed.
   for (int r = 0; r < display_->height(); ++r) {
     for (int c = display_->width() - 1; c > 0; --c) {
