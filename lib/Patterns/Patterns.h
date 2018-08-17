@@ -9,10 +9,10 @@ public:
   Patterns(CRGB *leds, uint8_t width, uint8_t height);
   enum PatternType {
     UNLIT,
-    GYRO_RAINBOW,
-    RANDOM_RAINBOW,
     SPARKLE,
     BARS,
+    RANDOM_RAINBOW,
+    GYRO_RAINBOW,
     CONFETTI,
     FIRE,
     // BLUE_FIRE,

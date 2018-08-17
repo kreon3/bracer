@@ -10,7 +10,7 @@
 #include <Logging.h>
 
 Patterns::Patterns(CRGB *leds, uint8_t width, uint8_t height)
-    : display_(leds, width, height), current_pattern_type_(FIRE) {
+    : display_(leds, width, height), current_pattern_type_(SPARKLE) {
   patterns_[UNLIT] = new UnlitPattern(&display_);
   patterns_[GYRO_RAINBOW] = new GyroRainbowPattern(&display_, 20);
   patterns_[RANDOM_RAINBOW] = new RandomRainbowPattern(&display_, 20);
