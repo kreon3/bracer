@@ -10,6 +10,7 @@ public:
   enum PatternType {
     UNLIT,
     SPARKLE,
+    CUTTLEFISH,
     BARS,
     RANDOM_RAINBOW,
     GYRO_RAINBOW,
