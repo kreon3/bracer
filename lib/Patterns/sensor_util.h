@@ -3,7 +3,7 @@
 
 #include <Adafruit_BNO055.h>
 
-// Returns an inensity from 0-255 from the linear acceleration.
+// Returns an intensity from 0-255 from the linear acceleration.
 uint8_t get_linear_intensity(Adafruit_BNO055 &sensor);
 
 // Logs the normalized gravity vector.
